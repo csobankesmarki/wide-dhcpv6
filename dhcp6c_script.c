@@ -72,6 +72,7 @@ static char nispserver_str[] = "new_nisp_servers";
 static char nispname_str[] = "new_nisp_name";
 static char bcmcsserver_str[] = "new_bcmcs_servers";
 static char bcmcsname_str[] = "new_bcmcs_name";
+static char iapdprefixes_str[] = "new_iapd_prefixes";
 
 int client6_script(char *, int, struct dhcp6_optinfo *);
 
@@ -86,6 +87,7 @@ client6_script(scriptpath, state, optinfo)
 	int nisservers, nisnamelen;
 	int nispservers, nispnamelen;
 	int bcmcsservers, bcmcsnamelen;
+	int iapdprefixes;
 	char **envp, *s;
 	char reason[32];
 	struct dhcp6_listval *v;
@@ -111,6 +113,7 @@ client6_script(scriptpath, state, optinfo)
 	nispnamelen = 0;
 	bcmcsservers = 0;
 	bcmcsnamelen = 0;
+	iapdprefixes = 0;
 	envc = 2;     /* we at least include the reason and the terminator */
 	if (state == DHCP6S_EXIT)
 		goto setenv;
@@ -162,6 +165,10 @@ client6_script(scriptpath, state, optinfo)
 		bcmcsnamelen += v->val_vbuf.dv_len;
 	}
 	envc += bcmcsnamelen ? 1 : 0;
+
+	for (v = TAILQ_FIRST(&optinfo->iapd_list); v; v = TAILQ_NEXT(v, link))
+		iapdprefixes++;
+	envc += iapdprefixes ? 1 : 0;
 
 setenv:
 	/* allocate an environments array */
@@ -393,6 +400,44 @@ setenv:
 			strlcat(s, v->val_vbuf.dv_buf, elen);
 			strlcat(s, " ", elen);
 		}
+	}
+
+	if (iapdprefixes) {
+		elen = sizeof (iapdprefixes_str) +
+		    (INET6_ADDRSTRLEN + 1) * iapdprefixes + 1;
+		if ((s = envp[i++] = malloc(elen)) == NULL) {
+			d_printf(LOG_NOTICE, FNAME,
+			    "failed to allocate strings for IAPD prefixes");
+			ret = -1;
+			goto clean;
+		}
+		memset(s, 0, elen);
+		snprintf(s, elen, "%s=", iapdprefixes_str);
+
+		struct in6_addr *iapdprefix;
+		if ((iapdprefix = (in6_addr)malloc(sizeof(struct in6_addr))) == NULL) {
+			d_printf(LOG_NOTICE, FNAME,
+				"failed to allocate memory to copy IAPD prefixes");
+			ret = -1;
+			goto clean;
+		}
+
+		for (v = TAILQ_FIRST(&optinfo->iapd_list); v;
+		    v = TAILQ_NEXT(v, link)) {
+			char *siapdprefix;
+
+			/* XXX: prefix_addr is badly aligned, so we need memcpy */
+			memcpy(&iapdprefix, &v->val_prefix6.addr, sizeof(struct in6_addr));
+			siapdprefix = in6addr2str(&iapdprefix, 0);
+			strlcat(s, siapdprefix, elen);
+			strlcat(s, "/", elen);
+			char siapdprefixlen[3];
+
+			snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",&v->val_prefix6.plen);
+			strlcat(s, siapdprefixlen, elen);
+			strlcat(s, " ", elen);
+		}
+		free(iapdprefix);
 	}
 launch:
 	/* launch the script */
