@@ -427,8 +427,8 @@ setenv:
 			char *siapdprefix;
 
 			/* XXX: prefix_addr is badly aligned, so we need memcpy */
-			memcpy(iapdprefix->addr, &v->val_prefix6.addr, sizeof(struct in6_addr));
-			siapdprefix = in6addr2str(iapdprefix->addr, 0);
+			memcpy(&iapdprefix->addr, &v->val_prefix6.addr, sizeof(struct in6_addr));
+			siapdprefix = in6addr2str(&iapdprefix->addr, 0);
 			strlcat(s, siapdprefix, elen);
 			strlcat(s, "/", elen);
 			char siapdprefixlen[3];
