@@ -414,8 +414,8 @@ setenv:
 		memset(s, 0, elen);
 		snprintf(s, elen, "%s=", iapdprefixes_str);
 
-		struct in6_addr *iapdprefix;
-		if ((iapdprefix = (struct in6_addr)malloc(sizeof(struct in6_addr))) == NULL) {
+		struct dhcp6_prefix *iapdprefix;
+		if ((iapdprefix = (struct dhcp6_prefix *)malloc(sizeof(struct dhcp6_prefix))) == NULL) {
 			d_printf(LOG_NOTICE, FNAME,
 				"failed to allocate memory to copy IAPD prefixes");
 			ret = -1;
@@ -427,7 +427,7 @@ setenv:
 			char *siapdprefix;
 
 			/* XXX: prefix_addr is badly aligned, so we need memcpy */
-			memcpy(&iapdprefix, &v->val_prefix6.addr, sizeof(struct in6_addr));
+			memcpy(&iapdprefix, &v->val_prefix6.addr, sizeof(struct dhcp6_prefix));
 			siapdprefix = in6addr2str(iapdprefix, 0);
 			strlcat(s, siapdprefix, elen);
 			strlcat(s, "/", elen);
