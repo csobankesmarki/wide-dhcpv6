@@ -1,0 +1,8 @@
+!.gitignore*
+Makefile
+*.o
+*.log
+dhcp6c
+dhcp6ctl
+dhcp6relay
+y.tab.h
