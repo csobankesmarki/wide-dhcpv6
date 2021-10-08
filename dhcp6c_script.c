@@ -426,14 +426,13 @@ setenv:
 		    v = TAILQ_NEXT(v, link)) {
 			char *siapdprefix;
 
-			/* XXX: prefix_addr is badly aligned, so we need memcpy */
-			memcpy(&iapdprefix->addr, &v->val_prefix6.addr, sizeof(struct in6_addr));
-			siapdprefix = in6addr2str(&iapdprefix->addr, 0);
+			memcpy(&iapdprefix, &v->val_prefix6, sizeof(struct dhcp6_prefix));
+			siapdprefix = in6addr2str(&iapd_prefix.addr, 0);
 			strlcat(s, siapdprefix, elen);
 			strlcat(s, "/", elen);
 			char siapdprefixlen[3];
 
-			snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",v->val_prefix6.plen);
+			snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",iapd_prefix.plen);
 			strlcat(s, siapdprefixlen, elen);
 			strlcat(s, " ", elen);
 		}
