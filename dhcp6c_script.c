@@ -427,12 +427,12 @@ setenv:
 			char *siapdprefix;
 
 			memcpy(&iapdprefix, &v->val_prefix6, sizeof(struct dhcp6_prefix));
-			siapdprefix = in6addr2str(&iapd_prefix.addr, 0);
+			siapdprefix = in6addr2str(&iapdprefix.addr, 0);
 			strlcat(s, siapdprefix, elen);
 			strlcat(s, "/", elen);
 			char siapdprefixlen[3];
 
-			snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",iapd_prefix.plen);
+			snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",iapdprefix.plen);
 			strlcat(s, siapdprefixlen, elen);
 			strlcat(s, " ", elen);
 		}
