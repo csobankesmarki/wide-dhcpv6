@@ -2,7 +2,11 @@
 Makefile
 *.o
 *.log
+*.status
+cfparse.c
+cftoken.c
 dhcp6c
 dhcp6ctl
 dhcp6relay
+dhcp6s
 y.tab.h
