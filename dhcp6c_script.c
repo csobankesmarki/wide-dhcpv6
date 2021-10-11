@@ -426,7 +426,7 @@ setenv:
 		    v = TAILQ_NEXT(v, link)) {
 			char *siapdprefix;
 
-			memcpy(&iapdprefix, &v->val_prefix6, sizeof(struct dhcp6_prefix));
+			memcpy(iapdprefix, &v->val_prefix6, sizeof(struct dhcp6_prefix));
 			siapdprefix = in6addr2str(&iapdprefix->addr, 0);
 			strlcat(s, siapdprefix, elen);
 			strlcat(s, "/", elen);
