@@ -414,29 +414,28 @@ setenv:
 		memset(s, 0, elen);
 		snprintf(s, elen, "%s=", iapdprefixes_str);
 
-		struct dhcp6_prefix *iapdprefix;
-		if ((iapdprefix = (struct dhcp6_prefix *)malloc(sizeof(struct dhcp6_prefix))) == NULL) {
-			d_printf(LOG_NOTICE, FNAME,
-				"failed to allocate memory to copy IAPD prefixes");
-			ret = -1;
-			goto clean;
-		}
-
 		for (v = TAILQ_FIRST(&optinfo->iapd_list); v;
 		    v = TAILQ_NEXT(v, link)) {
-			char *siapdprefix;
+			
+			struct dhcp6_listval *sv;
 
-			memcpy(iapdprefix, &v->val_prefix6, sizeof(struct dhcp6_prefix));
-			siapdprefix = in6addr2str(&iapdprefix->addr, 0);
-			strlcat(s, siapdprefix, elen);
-			strlcat(s, "/", elen);
-			char siapdprefixlen[3];
+			for (sv = TAILQ_FIRST(&v->sublist); sv;
+			sv = TAILQ_NEXT(sv, link)) {
+			
+				struct dhcp6_prefix iapdprefix;
+				char *siapdprefix;
 
-			snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",iapdprefix->plen);
-			strlcat(s, siapdprefixlen, elen);
-			strlcat(s, " ", elen);
+				memcpy(&iapdprefix, &sv->val_prefix6, sizeof(struct dhcp6_prefix));
+				siapdprefix = in6addr2str(&iapdprefix.addr, 0);
+				strlcat(s, siapdprefix, elen);
+				strlcat(s, "/", elen);
+				char siapdprefixlen[3];
+
+				snprintf(siapdprefixlen, sizeof(siapdprefixlen),"%d",iapdprefix.plen);
+				strlcat(s, siapdprefixlen, elen);
+				strlcat(s, " ", elen);
+			}
 		}
-		free(iapdprefix);
 	}
 launch:
 	/* launch the script */
